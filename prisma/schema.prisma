@@ -1,0 +1,188 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Platform {
+  FACEBOOK
+  INSTAGRAM
+  THREADS
+  TIKTOK
+}
+
+enum AdNetwork {
+  META
+  TIKTOK
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  PARTIAL
+  FAILED
+}
+
+enum TargetStatus {
+  PENDING
+  PUBLISHING
+  PUBLISHED
+  FAILED
+}
+
+enum RecommendationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXECUTED
+  FAILED
+}
+
+/// A social profile we can publish to (FB Page, IG business account, Threads profile, TikTok creator).
+model Account {
+  id             String       @id @default(cuid())
+  platform       Platform
+  externalId     String
+  name           String
+  avatarUrl      String?
+  /// AES-GCM encrypted, see src/lib/crypto.ts
+  accessToken    String
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+  /// Platform specific extras, e.g. the FB Page an IG account belongs to.
+  meta           Json         @default("{}")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  targets        PostTarget[]
+
+  @@unique([platform, externalId])
+}
+
+model AdAccount {
+  id           String     @id @default(cuid())
+  network      AdNetwork
+  externalId   String
+  name         String
+  currency     String     @default("MYR")
+  accessToken  String
+  meta         Json       @default("{}")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  campaigns    Campaign[]
+
+  @@unique([network, externalId])
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  filename  String
+  mimeType  String
+  size      Int
+  /// Path relative to UPLOAD_DIR
+  path      String
+  createdAt DateTime @default(now())
+  posts     Post[]
+}
+
+model Post {
+  id          String       @id @default(cuid())
+  caption     String
+  mediaId     String?
+  media       Media?       @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  scheduledAt DateTime?
+  status      PostStatus   @default(DRAFT)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  targets     PostTarget[]
+
+  @@index([status, scheduledAt])
+}
+
+model PostTarget {
+  id          String       @id @default(cuid())
+  postId      String
+  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  accountId   String
+  account     Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  status      TargetStatus @default(PENDING)
+  externalId  String?
+  permalink   String?
+  error       String?
+  publishedAt DateTime?
+
+  @@unique([postId, accountId])
+}
+
+model Campaign {
+  id           String           @id @default(cuid())
+  adAccountId  String
+  adAccount    AdAccount        @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
+  externalId   String
+  name         String
+  objective    String?
+  status       String
+  /// Daily budget in the ad account currency, major units (e.g. RM 20.00)
+  dailyBudget  Float?
+  lastSyncedAt DateTime?
+  meta         Json             @default("{}")
+  insights     InsightDaily[]
+  recommendations Recommendation[]
+
+  @@unique([adAccountId, externalId])
+}
+
+model InsightDaily {
+  id          String   @id @default(cuid())
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  date        DateTime @db.Date
+  spend       Float    @default(0)
+  impressions Int      @default(0)
+  reach       Int      @default(0)
+  clicks      Int      @default(0)
+  videoViews  Int      @default(0)
+  conversions Int      @default(0)
+
+  @@unique([campaignId, date])
+}
+
+/// AI suggestions. Nothing that spends money runs until the owner approves it.
+model Recommendation {
+  id         String               @id @default(cuid())
+  campaignId String?
+  campaign   Campaign?            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  /// PAUSE | RESUME | SET_BUDGET | INFO
+  kind       String
+  title      String
+  reason     String
+  action     Json                 @default("{}")
+  status     RecommendationStatus @default(PENDING)
+  result     String?
+  createdAt  DateTime             @default(now())
+  decidedAt  DateTime?
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model AiUsage {
+  id           String   @id @default(cuid())
+  provider     String
+  model        String
+  task         String
+  inputTokens  Int
+  outputTokens Int
+  costUsd      Float
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+}
