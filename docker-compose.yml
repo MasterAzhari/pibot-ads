@@ -1,0 +1,60 @@
+# Deploy on the VPS next to the existing caddy-gen stack (/root/docker-compose.yml).
+# caddy-gen watches the shared `root_default` network and issues TLS for virtual.host automatically.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pibot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: pibot_ads
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pibot -d pibot_ads"]
+      interval: 10s
+      retries: 5
+
+  app:
+    build: .
+    image: pibot-ads:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://pibot:${POSTGRES_PASSWORD}@db:5432/pibot_ads
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal, root_default]
+    labels:
+      virtual.host: ${APP_DOMAIN:-ads.pibot.io}
+      virtual.port: "3000"
+      virtual.tls-email: ${TLS_EMAIL:-developer.pibot@gmail.com}
+
+  worker:
+    image: pibot-ads:latest
+    restart: unless-stopped
+    command: ["npx", "tsx", "worker/index.ts"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://pibot:${POSTGRES_PASSWORD}@db:5432/pibot_ads
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      app:
+        condition: service_started
+    networks: [internal]
+
+volumes:
+  db-data:
+  uploads:
+
+networks:
+  internal:
+  root_default:
+    external: true
