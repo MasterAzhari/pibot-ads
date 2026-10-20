@@ -46,7 +46,7 @@ export function ComposeForm({ accounts }: { accounts: Acc[] }) {
     <div className="grid gap-4 lg:grid-cols-3">
       <div className="card space-y-4 lg:col-span-2">
         <div>
-          <label>Post ke</label>
+          <label>Post to</label>
           <div className="flex flex-wrap gap-2">
             {accounts.map((a) => (
               <button
@@ -63,50 +63,50 @@ export function ComposeForm({ accounts }: { accounts: Acc[] }) {
         <div>
           <label>Caption</label>
           <textarea rows={7} value={caption} onChange={(e) => setCaption(e.target.value)} />
-          <p className="text-xs muted mt-1">{caption.length} aksara. Threads maksimum 500, TikTok 2200.</p>
+          <p className="text-xs muted mt-1">{caption.length} characters. Threads max 500, TikTok 2200.</p>
         </div>
         <div>
-          <label>Gambar / video</label>
+          <label>Image / video</label>
           <MediaPicker value={media} onChange={setMedia} />
-          {missingMedia && <p className="text-xs text-amber-600 mt-1">Instagram dan TikTok perlukan gambar atau video.</p>}
+          {missingMedia && <p className="text-xs text-amber-600 mt-1">Instagram and TikTok need an image or video.</p>}
         </div>
         <div className="flex flex-wrap items-end gap-3">
           <div>
-            <label>Bila</label>
+            <label>When</label>
             <select value={mode} onChange={(e) => setMode(e.target.value as typeof mode)}>
-              <option value="schedule">Jadualkan</option>
-              <option value="now">Post sekarang</option>
-              <option value="draft">Simpan draf</option>
+              <option value="schedule">Schedule</option>
+              <option value="now">Publish now</option>
+              <option value="draft">Save draft</option>
             </select>
           </div>
           {mode === "schedule" && (
             <div>
-              <label>Tarikh & masa (waktu Malaysia)</label>
+              <label>Date & time (Malaysia time)</label>
               <input type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} />
             </div>
           )}
           <button className="btn" disabled={!!busy || !selected.length || missingMedia} onClick={submit}>
-            {busy === "submit" ? "Sedang proses…" : mode === "now" ? "Post sekarang" : mode === "schedule" ? "Jadualkan" : "Simpan"}
+            {busy === "submit" ? "Working…" : mode === "now" ? "Publish now" : mode === "schedule" ? "Schedule" : "Save"}
           </button>
         </div>
         {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
 
       <div className="card space-y-3">
-        <h2 className="font-semibold">Bantuan AI</h2>
+        <h2 className="font-semibold">AI assistant</h2>
         <div>
-          <label>Terangkan post ni</label>
-          <textarea rows={4} placeholder="cth: promosi tudung satin baru, diskaun 20% sampai Ahad" value={brief} onChange={(e) => setBrief(e.target.value)} />
+          <label>Describe this post</label>
+          <textarea rows={4} placeholder="e.g. new satin hijab launch, 20% off until Sunday" value={brief} onChange={(e) => setBrief(e.target.value)} />
         </div>
         <button className="btn btn-ghost" disabled={busy === "ai" || !(brief || caption)} onClick={generate}>
-          {busy === "ai" ? "Menjana…" : "Cadang caption"}
+          {busy === "ai" ? "Generating…" : "Suggest captions"}
         </button>
         {ideas.map((idea, i) => (
           <div key={i} className="border rounded-lg p-2 text-sm space-y-1" style={{ borderColor: "var(--border)" }}>
             <p className="whitespace-pre-line">{idea.caption}</p>
             <p className="muted text-xs">{idea.hashtags.join(" ")}</p>
             <button className="text-xs underline" onClick={() => setCaption(`${idea.caption}\n\n${idea.hashtags.join(" ")}`)}>
-              Guna ini
+              Use this
             </button>
           </div>
         ))}

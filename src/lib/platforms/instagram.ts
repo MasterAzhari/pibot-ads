@@ -8,7 +8,7 @@ import type { Publisher } from "./types";
 // IG does not allow editing captions or deleting posts through the API.
 export const instagram: Publisher = {
   async publish(account, { caption, media }) {
-    if (!media) throw new Error("Instagram perlukan gambar atau video");
+    if (!media) throw new Error("Instagram needs an image or video");
     const token = decrypt(account.accessToken);
     const igId = account.externalId;
     const container = isVideo(media)
@@ -18,7 +18,7 @@ export const instagram: Publisher = {
     await poll(
       async () => {
         const { status_code } = await graph.get(container.id, token, { fields: "status_code" });
-        if (status_code === "ERROR" || status_code === "EXPIRED") throw new Error(`Instagram gagal proses media (${status_code})`);
+        if (status_code === "ERROR" || status_code === "EXPIRED") throw new Error(`Instagram failed to process the media (${status_code})`);
         return status_code === "FINISHED" ? true : undefined;
       },
       { intervalMs: 5000, timeoutMs: 15 * 60_000 },

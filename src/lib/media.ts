@@ -18,7 +18,7 @@ export async function saveUpload(file: File) {
 export function mediaFilePath(rel: string) {
   const dir = path.resolve(env().UPLOAD_DIR);
   const full = path.resolve(dir, rel);
-  if (!full.startsWith(dir + path.sep)) throw new Error("Path tidak sah");
+  if (!full.startsWith(dir + path.sep)) throw new Error("Invalid path");
   return full;
 }
 

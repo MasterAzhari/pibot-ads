@@ -34,44 +34,44 @@ export default async function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Ringkasan</h1>
+      <h1 className="text-2xl font-semibold">Overview</h1>
       {accounts === 0 && (
         <div className="card">
-          Belum ada akaun disambung. <Link href="/accounts" className="underline">Sambung FB, IG, Threads atau TikTok</Link> untuk mula.
+          No accounts connected yet. <Link href="/accounts" className="underline">Connect FB, IG, Threads or TikTok</Link> to get started.
         </div>
       )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Akaun sosial" value={String(accounts)} sub={`${adAccounts} ad account`} />
-        <Stat label="Spend iklan 7 hari" value={spendText} sub={`${clicks} klik`} />
-        <Stat label="Cadangan AI menunggu" value={String(pending)} sub={<Link href="/ads" className="underline">Semak</Link>} />
-        <Stat label="Kos AI bulan ini" value={`USD ${aiSpent.toFixed(2)}`} sub={`had USD ${ai.monthlyBudgetUsd}`} />
+        <Stat label="Social accounts" value={String(accounts)} sub={`${adAccounts} ad account`} />
+        <Stat label="Ad spend (7 days)" value={spendText} sub={`${clicks} clicks`} />
+        <Stat label="AI suggestions pending" value={String(pending)} sub={<Link href="/ads" className="underline">Review</Link>} />
+        <Stat label="AI cost this month" value={`USD ${aiSpent.toFixed(2)}`} sub={`limit USD ${ai.monthlyBudgetUsd}`} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="card space-y-2">
-          <h2 className="font-semibold">Post akan datang</h2>
-          {upcoming.length === 0 && <p className="muted text-sm">Tiada post dijadualkan.</p>}
+          <h2 className="font-semibold">Upcoming posts</h2>
+          {upcoming.length === 0 && <p className="muted text-sm">No scheduled posts.</p>}
           {upcoming.map((p) => (
             <div key={p.id} className="text-sm flex justify-between gap-3">
-              <span className="truncate">{p.caption || "(tiada caption)"}</span>
+              <span className="truncate">{p.caption || "(no caption)"}</span>
               <span className="muted whitespace-nowrap">{fmtDateTime(p.scheduledAt)}</span>
             </div>
           ))}
           {failed > 0 && (
             <p className="text-sm text-red-500">
-              {failed} post gagal atau separuh berjaya. <Link href="/posts" className="underline">Lihat</Link>
+              {failed} post(s) failed or partly failed. <Link href="/posts" className="underline">View</Link>
             </p>
           )}
         </section>
         <section className="card space-y-2">
-          <h2 className="font-semibold">Analisis AI terakhir</h2>
+          <h2 className="font-semibold">Latest AI analysis</h2>
           {last.summary ? (
             <>
               <p className="text-sm whitespace-pre-line">{last.summary}</p>
               <p className="text-xs muted">{fmtDateTime(last.at ? new Date(last.at) : null)}</p>
             </>
           ) : (
-            <p className="muted text-sm">Analisis berjalan setiap pagi selepas ada kempen iklan.</p>
+            <p className="muted text-sm">Analysis runs every morning once you have ad campaigns.</p>
           )}
         </section>
       </div>

@@ -18,19 +18,19 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Tetapan AI</h1>
-      {saved && <div className="card text-sm">✓ Disimpan</div>}
+      <h1 className="text-2xl font-semibold">AI settings</h1>
+      {saved && <div className="card text-sm">✓ Saved</div>}
       <form action={saveAiSettings} className="space-y-4">
         <section className="card space-y-3">
-          <h2 className="font-semibold">Provider & model</h2>
-          <p className="text-xs muted">API key diletak dalam fail .env di server (ANTHROPIC_API_KEY, OPENAI_API_KEY, LLAMA_API_KEY). Sistem sambung terus ke setiap provider.</p>
+          <h2 className="font-semibold">Providers & models</h2>
+          <p className="text-xs muted">API keys go in the server .env file (ANTHROPIC_API_KEY, OPENAI_API_KEY, LLAMA_API_KEY). The system calls each provider directly.</p>
           <table>
             <thead>
               <tr>
                 <th>Provider</th>
                 <th>Key</th>
-                <th>Model ringan (caption, skrip)</th>
-                <th>Model berat (audience, analisis)</th>
+                <th>Light model (captions, scripts)</th>
+                <th>Heavy model (audience, analysis)</th>
                 <th>Fallback</th>
               </tr>
             </thead>
@@ -38,7 +38,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               {PROVIDERS.map((p) => (
                 <tr key={p}>
                   <td>{PROVIDER_LABEL[p]}</td>
-                  <td>{hasKey(p) ? "✓" : <span className="muted">tiada</span>}</td>
+                  <td>{hasKey(p) ? "✓" : <span className="muted">missing</span>}</td>
                   <td>
                     <input name={`${p}_light`} defaultValue={s.models[p]?.light} />
                   </td>
@@ -54,7 +54,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           </table>
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
-              <label>Provider utama: tugas ringan</label>
+              <label>Main provider: light tasks</label>
               <select name="light" defaultValue={s.light}>
                 {PROVIDERS.map((p) => (
                   <option key={p} value={p}>
@@ -64,7 +64,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               </select>
             </div>
             <div>
-              <label>Provider utama: tugas berat</label>
+              <label>Main provider: heavy tasks</label>
               <select name="heavy" defaultValue={s.heavy}>
                 {PROVIDERS.map((p) => (
                   <option key={p} value={p}>
@@ -74,15 +74,19 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               </select>
             </div>
             <div>
-              <label>Had bajet AI sebulan (USD)</label>
+              <label>Monthly AI budget (USD)</label>
               <input type="number" step="0.5" min={0} name="monthlyBudgetUsd" defaultValue={s.monthlyBudgetUsd} />
             </div>
+          </div>
+          <div>
+            <label>Language for captions, scripts and ad text</label>
+            <input name="contentLanguage" defaultValue={s.contentLanguage} placeholder="e.g. English, Bahasa Melayu, Manglish" />
           </div>
         </section>
 
         <section className="card space-y-2">
-          <h2 className="font-semibold">Harga model (USD per 1 juta token)</h2>
-          <p className="text-xs muted">Satu baris setiap model: nama, harga input, harga output. Isi harga OpenAI/Llama sendiri supaya had bajet dikira dengan betul.</p>
+          <h2 className="font-semibold">Model prices (USD per 1M tokens)</h2>
+          <p className="text-xs muted">One line per model: name, input price, output price. Fill in OpenAI/Llama prices yourself so the budget limit is counted correctly.</p>
           <textarea
             name="prices"
             rows={6}
@@ -91,19 +95,19 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               .join("\n")}
           />
         </section>
-        <button className="btn">Simpan</button>
+        <button className="btn">Save</button>
       </form>
 
       <section className="card">
-        <h2 className="font-semibold mb-2">Penggunaan (bulan ini USD {spent.toFixed(4)})</h2>
+        <h2 className="font-semibold mb-2">Usage (this month USD {spent.toFixed(4)})</h2>
         <table>
           <thead>
             <tr>
               <th>Provider</th>
               <th>Model</th>
-              <th>Panggilan</th>
+              <th>Calls</th>
               <th>Token in / out</th>
-              <th>Kos (semua masa)</th>
+              <th>Cost (all time)</th>
             </tr>
           </thead>
           <tbody>

@@ -60,7 +60,7 @@ export async function signState(data: Record<string, string>) {
 }
 
 export async function readState(state: string | null) {
-  if (!state) throw new Error("state tiada");
+  if (!state) throw new Error("missing state");
   const { payload } = await jwtVerify(state, secret());
   return payload as Record<string, string>;
 }

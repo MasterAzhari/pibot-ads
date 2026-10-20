@@ -38,7 +38,7 @@ export async function requestJson<T = any>(
   try {
     res = await fetch(target, { ...rest, headers: h, body });
   } catch (err) {
-    throw new Error(`Tak dapat sambung ke ${new URL(target).host}: ${err instanceof Error ? err.message : err}`);
+    throw new Error(`Could not reach ${new URL(target).host}: ${err instanceof Error ? err.message : err}`);
   }
   const text = await res.text();
   let data: any;
@@ -64,5 +64,5 @@ export async function poll<T>(check: () => Promise<T | undefined>, { intervalMs 
     if (result !== undefined) return result;
     await sleep(intervalMs);
   }
-  throw new Error("Masa menunggu tamat (timeout)");
+  throw new Error("Timed out waiting");
 }

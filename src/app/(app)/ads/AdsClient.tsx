@@ -11,7 +11,7 @@ function useRunner() {
     setMsg(null);
     const res = await fn();
     setBusy(false);
-    setMsg(res.ok ? (ok ?? null) : (res.error ?? "Gagal"));
+    setMsg(res.ok ? (ok ?? null) : (res.error ?? "Failed"));
   }
   return { busy, msg, run };
 }
@@ -21,11 +21,11 @@ export function AdsToolbar() {
   return (
     <div className="flex items-center gap-2">
       {msg && <span className="text-xs">{msg}</span>}
-      <button className="btn btn-ghost" disabled={busy} onClick={() => run(syncAdsAction, "Data dikemaskini")}>
+      <button className="btn btn-ghost" disabled={busy} onClick={() => run(syncAdsAction, "Data updated")}>
         Sync
       </button>
-      <button className="btn btn-ghost" disabled={busy} onClick={() => run(runAnalysisAction, "Analisis siap")}>
-        {busy ? "…" : "Analisis AI sekarang"}
+      <button className="btn btn-ghost" disabled={busy} onClick={() => run(runAnalysisAction, "Analysis done")}>
+        {busy ? "…" : "Run AI analysis"}
       </button>
     </div>
   );
@@ -46,11 +46,11 @@ export function CampaignControls({ id, active, budget, currency }: { id: string;
         className={`btn ${active ? "btn-ghost" : ""}`}
         disabled={busy}
         onClick={() => {
-          if (active || confirm("Hidupkan kempen ini? Iklan akan mula berbelanja."))
+          if (active || confirm("Turn this campaign on? Ads will start spending."))
             run(() => toggleCampaign(id, !active));
         }}
       >
-        {active ? "Pause" : "Hidupkan"}
+        {active ? "Pause" : "Turn on"}
       </button>
       {msg && <p className="text-xs">{msg}</p>}
     </div>
@@ -62,10 +62,10 @@ export function RecommendationButtons({ id, actionable }: { id: string; actionab
   return (
     <div className="flex gap-2 items-center">
       <button className="btn" disabled={busy} onClick={() => run(() => decideRecommendation(id, true))}>
-        {actionable ? "Approve & laksana" : "Faham"}
+        {actionable ? "Approve & apply" : "Got it"}
       </button>
       <button className="btn btn-ghost" disabled={busy} onClick={() => run(() => decideRecommendation(id, false))}>
-        Tolak
+        Reject
       </button>
       {msg && <span className="text-xs text-red-500">{msg}</span>}
     </div>

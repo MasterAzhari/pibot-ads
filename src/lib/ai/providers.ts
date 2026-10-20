@@ -31,7 +31,7 @@ async function callAnthropic(req: CompletionRequest): Promise<CompletionResult> 
     // Light tasks don't need deep thinking; keeping effort low keeps them cheap.
     output_config: { effort: req.heavy ? "medium" : "low" },
   });
-  if (res.stop_reason === "refusal") throw new Error("Claude menolak permintaan ini");
+  if (res.stop_reason === "refusal") throw new Error("Claude declined this request");
   const text = res.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
   return { text, inputTokens: res.usage.input_tokens, outputTokens: res.usage.output_tokens };
 }

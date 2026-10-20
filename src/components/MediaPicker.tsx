@@ -24,13 +24,13 @@ export function MediaPicker({ value, onChange, accept = "image/*,video/*" }: { v
   return (
     <div className="space-y-1">
       <input type="file" accept={accept} disabled={busy} onChange={(e) => onFile(e.target.files?.[0])} />
-      {busy && <p className="text-xs muted">Memuat naik…</p>}
+      {busy && <p className="text-xs muted">Uploading…</p>}
       {error && <p className="text-xs text-red-500">{error}</p>}
       {value && (
         <p className="text-xs">
-          ✓ {value.filename} ({value.mimeType.startsWith("video/") ? "video" : "gambar"}){" "}
+          ✓ {value.filename} ({value.mimeType.startsWith("video/") ? "video" : "image"}){" "}
           <button type="button" className="underline muted" onClick={() => onChange(null)}>
-            buang
+            remove
           </button>
         </p>
       )}

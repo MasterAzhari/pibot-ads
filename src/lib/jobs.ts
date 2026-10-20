@@ -89,7 +89,7 @@ export async function runDailyAnalysis() {
 /** Runs only after the owner presses Approve. */
 export async function executeRecommendation(id: string) {
   const rec = await db.recommendation.findUniqueOrThrow({ where: { id }, include: { campaign: { include: { adAccount: true } } } });
-  if (rec.status !== "PENDING") throw new Error("Cadangan ini dah diproses");
+  if (rec.status !== "PENDING") throw new Error("This suggestion was already handled");
   if (!rec.campaign || rec.kind === "INFO") {
     await db.recommendation.update({ where: { id }, data: { status: "APPROVED", decidedAt: new Date() } });
     return;
@@ -101,7 +101,7 @@ export async function executeRecommendation(id: string) {
     else if (rec.kind === "RESUME") await net.setActive(campaign.adAccount, campaign, true);
     else if (rec.kind === "SET_BUDGET") {
       const amount = Number((rec.action as { dailyBudget?: number }).dailyBudget);
-      if (!amount || amount <= 0) throw new Error("Bajet baharu tidak sah");
+      if (!amount || amount <= 0) throw new Error("Invalid new budget");
       await net.setDailyBudget(campaign.adAccount, campaign, amount);
     }
     await db.recommendation.update({ where: { id }, data: { status: "EXECUTED", decidedAt: new Date(), result: "OK" } });

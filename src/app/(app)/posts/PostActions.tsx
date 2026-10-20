@@ -15,7 +15,7 @@ export function PostActions({ id, status, caption, noEdit }: { id: string; statu
     setMsg(null);
     const res = await fn();
     setBusy(false);
-    if (!res.ok) setMsg(res.error ?? "Gagal");
+    if (!res.ok) setMsg(res.error ?? "Failed");
     else setMsg(done?.(res.data) ?? null);
   }
 
@@ -26,12 +26,12 @@ export function PostActions({ id, status, caption, noEdit }: { id: string; statu
       <div className="flex flex-wrap gap-2">
         {(status === "DRAFT" || status === "SCHEDULED") && (
           <button className="btn btn-ghost" disabled={busy} onClick={() => run(() => publishNowAction(id))}>
-            Post sekarang
+            Publish now
           </button>
         )}
         {(status === "FAILED" || status === "PARTIAL") && (
           <button className="btn btn-ghost" disabled={busy} onClick={() => run(() => publishNowAction(id))}>
-            Cuba semula yang gagal
+            Retry failed
           </button>
         )}
         <button className="btn btn-ghost" onClick={() => setEditing((e) => !e)}>
@@ -40,8 +40,8 @@ export function PostActions({ id, status, caption, noEdit }: { id: string; statu
         {!published && (
           <span className="flex gap-1 items-center">
             <input type="datetime-local" className="!w-auto" value={when} onChange={(e) => setWhen(e.target.value)} />
-            <button className="btn btn-ghost" disabled={busy || !when} onClick={() => run(() => rescheduleAction(id, when), () => "Jadual dikemaskini")}>
-              Jadual semula
+            <button className="btn btn-ghost" disabled={busy || !when} onClick={() => run(() => rescheduleAction(id, when), () => "Schedule updated")}>
+              Reschedule
             </button>
           </span>
         )}
@@ -49,18 +49,18 @@ export function PostActions({ id, status, caption, noEdit }: { id: string; statu
           className="btn btn-danger"
           disabled={busy}
           onClick={() => {
-            if (confirm(published ? "Padam post ni dari platform juga (yang dibenarkan)?" : "Padam post ni?"))
-              run(() => deletePostAction(id), (manual: string[]) => (manual?.length ? `Padam sendiri di: ${manual.join(", ")}` : null));
+            if (confirm(published ? "Delete this post from the platforms too (where allowed)?" : "Delete this post?"))
+              run(() => deletePostAction(id), (manual: string[]) => (manual?.length ? `Delete manually on: ${manual.join(", ")}` : null));
           }}
         >
-          Padam
+          Delete
         </button>
       </div>
       {editing && (
         <div className="space-y-2">
           <textarea rows={4} value={text} onChange={(e) => setText(e.target.value)} />
           {published && noEdit.length > 0 && (
-            <p className="text-xs text-amber-600">API tak benarkan edit caption untuk: {noEdit.join(", ")}. Yang lain akan dikemaskini.</p>
+            <p className="text-xs text-amber-600">The API does not allow caption edits for: {noEdit.join(", ")}. The others will be updated.</p>
           )}
           <button
             className="btn"
@@ -70,12 +70,12 @@ export function PostActions({ id, status, caption, noEdit }: { id: string; statu
                 () => updateCaptionAction(id, text),
                 (skipped: string[]) => {
                   setEditing(false);
-                  return skipped?.length ? `Dikemaskini, kecuali ${skipped.join(", ")}` : "Caption dikemaskini";
+                  return skipped?.length ? `Updated, except ${skipped.join(", ")}` : "Caption updated";
                 },
               )
             }
           >
-            Simpan caption
+            Save caption
           </button>
         </div>
       )}

@@ -22,23 +22,23 @@ export default async function AdsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-semibold">Iklan</h1>
+        <h1 className="text-2xl font-semibold">Ads</h1>
         <div className="ml-auto flex gap-2">
           <AdsToolbar />
           <Link href="/ads/new" className="btn">
-            + Kempen baru
+            + New campaign
           </Link>
         </div>
       </div>
 
       <section className="card space-y-3">
-        <h2 className="font-semibold">Cadangan AI</h2>
+        <h2 className="font-semibold">AI suggestions</h2>
         {last.summary && (
           <p className="text-sm whitespace-pre-line">
             {last.summary} <span className="muted text-xs">({fmtDateTime(last.at ? new Date(last.at) : null)})</span>
           </p>
         )}
-        {!pending.length && <p className="text-sm muted">Tiada cadangan menunggu.</p>}
+        {!pending.length && <p className="text-sm muted">No pending suggestions.</p>}
         {pending.map((r) => (
           <div key={r.id} className="border rounded-lg p-3 text-sm space-y-1" style={{ borderColor: "var(--border)" }}>
             <div className="flex flex-wrap gap-2 items-center">
@@ -47,13 +47,13 @@ export default async function AdsPage() {
               {r.campaign && <span className="muted">· {r.campaign.name}</span>}
             </div>
             <p>{r.reason}</p>
-            {r.kind === "SET_BUDGET" && <p className="text-xs">Bajet baharu: {String((r.action as { dailyBudget?: number }).dailyBudget)}/hari</p>}
+            {r.kind === "SET_BUDGET" && <p className="text-xs">New budget: {String((r.action as { dailyBudget?: number }).dailyBudget)}/day</p>}
             <RecommendationButtons id={r.id} actionable={r.kind !== "INFO"} />
           </div>
         ))}
         {history.length > 0 && (
           <details className="text-xs">
-            <summary className="cursor-pointer muted">Sejarah</summary>
+            <summary className="cursor-pointer muted">History</summary>
             <ul className="mt-2 space-y-1">
               {history.map((r) => (
                 <li key={r.id}>
@@ -66,19 +66,19 @@ export default async function AdsPage() {
       </section>
 
       <section className="card overflow-x-auto">
-        <h2 className="font-semibold mb-2">Kempen (7 hari)</h2>
+        <h2 className="font-semibold mb-2">Campaigns (7 days)</h2>
         <table>
           <thead>
             <tr>
-              <th>Kempen</th>
+              <th>Campaign</th>
               <th>Status</th>
               <th>Spend</th>
               <th>Impression</th>
-              <th>Klik</th>
+              <th>Clicks</th>
               <th>CTR</th>
               <th>CPC</th>
-              <th>Tontonan</th>
-              <th>Bajet/hari</th>
+              <th>Video views</th>
+              <th>Budget/day</th>
             </tr>
           </thead>
           <tbody>
@@ -114,7 +114,7 @@ export default async function AdsPage() {
             {!campaigns.length && (
               <tr>
                 <td colSpan={9} className="muted">
-                  Belum ada kempen. Tekan "Sync" selepas sambung ad account, atau buat kempen baru.
+                  No campaigns yet. Press "Sync" after connecting an ad account, or create a new campaign.
                 </td>
               </tr>
             )}

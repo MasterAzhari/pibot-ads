@@ -16,18 +16,18 @@ export default async function PostsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Post & jadual</h1>
+        <h1 className="text-2xl font-semibold">Posts & schedule</h1>
         <Link href="/compose" className="btn">
-          + Post baru
+          + New post
         </Link>
       </div>
-      {!posts.length && <p className="muted">Belum ada post.</p>}
+      {!posts.length && <p className="muted">No posts yet.</p>}
       <div className="space-y-3">
         {posts.map((p) => (
           <div key={p.id} className="card space-y-2">
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="badge">{STATUS_LABEL[p.status]}</span>
-              <span className="muted">{p.scheduledAt ? `Jadual: ${fmtDateTime(p.scheduledAt)}` : `Dibuat ${fmtDateTime(p.createdAt)}`}</span>
+              <span className="muted">{p.scheduledAt ? `Scheduled: ${fmtDateTime(p.scheduledAt)}` : `Created ${fmtDateTime(p.createdAt)}`}</span>
               {p.media && <span className="muted">· {p.media.mimeType.startsWith("video/") ? "🎬" : "🖼️"} {p.media.filename}</span>}
             </div>
             <p className="whitespace-pre-line text-sm">{p.caption}</p>
@@ -37,7 +37,7 @@ export default async function PostsPage() {
                   {PLATFORM_LABEL[t.account.platform]} {t.account.name}: {STATUS_LABEL[t.status]}
                   {t.permalink && (
                     <a href={t.permalink} target="_blank" className="underline ml-1">
-                      buka
+                      open
                     </a>
                   )}
                 </span>

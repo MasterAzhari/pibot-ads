@@ -149,7 +149,7 @@ export const tiktokAds: AdsNetwork = {
   // Budget lives on the ad group (min ~USD 20/day) rather than the campaign (min ~USD 50/day), which is cheaper to start with.
   async setDailyBudget(account, campaign, amount) {
     const ids = adgroupIds(campaign);
-    if (!ids.length) throw new Error("Kempen ini tiada ad group yang direkod; ubah bajet di TikTok Ads Manager");
+    if (!ids.length) throw new Error("No ad groups recorded for this campaign; change the budget in TikTok Ads Manager");
     await call(account, "POST", "adgroup/budget/update/", {
       advertiser_id: adv(account),
       budget: ids.map((adgroup_id) => ({ adgroup_id, budget: amount / ids.length })),
@@ -168,12 +168,12 @@ export const tiktokAds: AdsNetwork = {
 
   async createCampaign(account, input) {
     const media = await db.media.findUniqueOrThrow({ where: { id: input.mediaId } });
-    if (!isVideo(media)) throw new Error("Iklan TikTok perlukan video");
+    if (!isVideo(media)) throw new Error("TikTok ads need a video");
     const o = OBJECTIVES[input.objective];
     const advertiser_id = adv(account);
     // Validate everything local before the first remote call so a bad input never leaves an orphan campaign.
     const location_ids = input.countries.map((c) => COUNTRY_LOCATION[c]).filter(Boolean);
-    if (!location_ids.length) throw new Error(`Negara belum dipetakan untuk TikTok: ${input.countries.join(", ")}`);
+    if (!location_ids.length) throw new Error(`Country not mapped for TikTok yet: ${input.countries.join(", ")}`);
 
     const campaign = await call(account, "POST", "campaign/create/", {
       advertiser_id,

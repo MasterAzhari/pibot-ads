@@ -19,6 +19,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ provider
     return NextResponse.redirect(new URL("/login", req.url));
   }
   const build = URLS[provider];
-  if (!build) return new Response("Provider tidak dikenali", { status: 404 });
+  if (!build) return new Response("Unknown provider", { status: 404 });
   return NextResponse.redirect(build(await signState({ provider })));
 }

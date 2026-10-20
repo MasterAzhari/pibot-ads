@@ -105,10 +105,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ provider
 
   try {
     const state = await readState(url.searchParams.get("state"));
-    if (state.provider !== provider) throw new Error("state tidak sepadan");
+    if (state.provider !== provider) throw new Error("state mismatch");
     // TikTok Business returns auth_code; everyone else returns code
     const code = url.searchParams.get("code") ?? url.searchParams.get("auth_code");
-    if (!code) throw new Error(url.searchParams.get("error_description") ?? url.searchParams.get("error") ?? "Tiada code");
+    if (!code) throw new Error(url.searchParams.get("error_description") ?? url.searchParams.get("error") ?? "No code returned");
     const handlers: Record<string, (c: string) => Promise<string>> = {
       meta: connectMeta,
       threads: connectThreads,

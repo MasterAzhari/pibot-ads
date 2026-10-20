@@ -43,7 +43,7 @@ export async function tiktokUser(token: string) {
 /** Access tokens live 24h; refresh on demand and store the new pair. */
 async function freshToken(account: Account) {
   if (account.tokenExpiresAt && account.tokenExpiresAt.getTime() > Date.now() + 5 * 60_000) return decrypt(account.accessToken);
-  if (!account.refreshToken) throw new Error("Token TikTok tamat, sila sambung semula akaun");
+  if (!account.refreshToken) throw new Error("TikTok token expired, please reconnect the account");
   const t = await tiktokToken({ grant_type: "refresh_token", refresh_token: decrypt(account.refreshToken) });
   await db.account.update({
     where: { id: account.id },
@@ -76,7 +76,7 @@ function chunking(size: number) {
 
 export const tiktok: Publisher = {
   async publish(account, { caption, media }) {
-    if (!media) throw new Error("TikTok perlukan video atau gambar");
+    if (!media) throw new Error("TikTok needs a video or image");
     const token = await freshToken(account);
     const post_info = {
       title: caption.slice(0, 2200),
@@ -106,7 +106,7 @@ export const tiktok: Publisher = {
           },
           body: buffer.subarray(start, end),
         });
-        if (!res.ok) throw new Error(`TikTok upload gagal (${res.status})`);
+        if (!res.ok) throw new Error(`TikTok upload failed (${res.status})`);
       }
     } else if (isImage(media)) {
       // Photo posts only support PULL_FROM_URL, so ads.pibot.io must be verified in the TikTok dev portal.
@@ -118,13 +118,13 @@ export const tiktok: Publisher = {
       });
       publishId = init.publish_id;
     } else {
-      throw new Error("Jenis fail tak disokong TikTok");
+      throw new Error("File type not supported by TikTok");
     }
 
     const status = await poll(
       async () => {
         const s = await tt(token, "post/publish/status/fetch/", { publish_id: publishId });
-        if (s.status === "FAILED") throw new Error(`TikTok gagal: ${s.fail_reason ?? "unknown"}`);
+        if (s.status === "FAILED") throw new Error(`TikTok failed: ${s.fail_reason ?? "unknown"}`);
         return s.status === "PUBLISH_COMPLETE" ? s : undefined;
       },
       { intervalMs: 5000, timeoutMs: 15 * 60_000 },

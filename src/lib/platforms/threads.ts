@@ -58,7 +58,7 @@ export const threads: Publisher = {
     if (params.media_type !== "TEXT") {
       await poll(async () => {
         const { status, error_message } = await get(container.id, token, { fields: "status,error_message" });
-        if (status === "ERROR" || status === "EXPIRED") throw new Error(`Threads gagal proses media: ${error_message ?? status}`);
+        if (status === "ERROR" || status === "EXPIRED") throw new Error(`Threads failed to process the media: ${error_message ?? status}`);
         return status === "FINISHED" ? true : undefined;
       });
     }

@@ -3,13 +3,13 @@ import { requireUser, destroySession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 const NAV = [
-  ["/", "Ringkasan"],
-  ["/compose", "Buat post"],
-  ["/posts", "Post & jadual"],
-  ["/ads", "Iklan"],
-  ["/studio", "Studio AI"],
-  ["/accounts", "Akaun"],
-  ["/settings", "Tetapan"],
+  ["/", "Overview"],
+  ["/compose", "Create post"],
+  ["/posts", "Posts"],
+  ["/ads", "Ads"],
+  ["/studio", "AI Studio"],
+  ["/accounts", "Accounts"],
+  ["/settings", "Settings"],
 ] as const;
 
 async function logout() {
@@ -33,7 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             ))}
           </nav>
           <form action={logout} className="ml-auto">
-            <button className="text-sm muted hover:underline">Log keluar</button>
+            <button className="text-sm muted hover:underline">Log out</button>
           </form>
         </div>
       </header>

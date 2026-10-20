@@ -9,10 +9,10 @@ import type { Interest, Objective } from "@/lib/ads";
 type AdAcc = { id: string; name: string; network: "META" | "TIKTOK"; currency: string };
 
 const OBJECTIVES: [Objective, string][] = [
-  ["TRAFFIC", "Trafik ke website / WhatsApp link"],
-  ["AWARENESS", "Capai ramai orang (reach)"],
-  ["VIDEO_VIEWS", "Tontonan video"],
-  ["ENGAGEMENT", "Engagement post"],
+  ["TRAFFIC", "Traffic to website / WhatsApp link"],
+  ["AWARENESS", "Reach as many people as possible"],
+  ["VIDEO_VIEWS", "Video views"],
+  ["ENGAGEMENT", "Post engagement"],
 ];
 const CTAS = ["LEARN_MORE", "SHOP_NOW", "SIGN_UP", "CONTACT_US", "ORDER_NOW", "DOWNLOAD"];
 
@@ -63,7 +63,7 @@ export function NewCampaignForm({ adAccounts }: { adAccounts: AdAcc[] }) {
   }
 
   async function submit() {
-    if (!media) return setError("Pilih video atau gambar iklan");
+    if (!media) return setError("Choose an ad video or image");
     setBusy("submit");
     setError(null);
     const res = await createCampaignAction(accountId, {
@@ -92,11 +92,11 @@ export function NewCampaignForm({ adAccounts }: { adAccounts: AdAcc[] }) {
             </select>
           </div>
           <div>
-            <label>Nama kempen</label>
+            <label>Campaign name</label>
             <input value={f.name} onChange={(e) => set("name", e.target.value)} />
           </div>
           <div>
-            <label>Objektif</label>
+            <label>Objective</label>
             <select value={f.objective} onChange={(e) => set("objective", e.target.value as Objective)}>
               {OBJECTIVES.map(([v, l]) => (
                 <option key={v} value={v}>
@@ -106,7 +106,7 @@ export function NewCampaignForm({ adAccounts }: { adAccounts: AdAcc[] }) {
             </select>
           </div>
           <div>
-            <label>Bajet harian ({account.currency})</label>
+            <label>Daily budget ({account.currency})</label>
             <input type="number" min={1} value={f.dailyBudget} onChange={(e) => set("dailyBudget", Number(e.target.value))} />
           </div>
         </section>
@@ -115,55 +115,55 @@ export function NewCampaignForm({ adAccounts }: { adAccounts: AdAcc[] }) {
           <h2 className="font-semibold">Audience</h2>
           <div className="grid gap-3 sm:grid-cols-4">
             <div>
-              <label>Negara (kod)</label>
+              <label>Countries (codes)</label>
               <input value={f.countries} onChange={(e) => set("countries", e.target.value)} />
             </div>
             <div>
-              <label>Umur min</label>
+              <label>Min age</label>
               <input type="number" value={f.ageMin} onChange={(e) => set("ageMin", Number(e.target.value))} />
             </div>
             <div>
-              <label>Umur max</label>
+              <label>Max age</label>
               <input type="number" value={f.ageMax} onChange={(e) => set("ageMax", Number(e.target.value))} />
             </div>
             <div>
-              <label>Jantina</label>
+              <label>Gender</label>
               <select value={f.gender} onChange={(e) => set("gender", e.target.value as typeof f.gender)}>
-                <option value="ALL">Semua</option>
-                <option value="FEMALE">Perempuan</option>
-                <option value="MALE">Lelaki</option>
+                <option value="ALL">All</option>
+                <option value="FEMALE">Female</option>
+                <option value="MALE">Male</option>
               </select>
             </div>
           </div>
           {account.network === "META" && (
             <label className="!flex items-center gap-2 !font-normal text-sm">
               <input type="checkbox" className="!w-auto" checked={f.advantageAudience} onChange={(e) => set("advantageAudience", e.target.checked)} />
-              Advantage+ audience (biar AI Meta luaskan audience; umur jadi cadangan sahaja)
+              Advantage+ audience (let Meta's AI widen the audience; age becomes a suggestion only)
             </label>
           )}
           <div>
-            <label>Minat (interest)</label>
+            <label>Interests</label>
             <div className="flex flex-wrap gap-1 mb-2">
               {interests.map((i) => (
                 <span key={i.id} className="badge">
                   {i.name}{" "}
-                  <button onClick={() => setInterests((s) => s.filter((x) => x.id !== i.id))} aria-label="buang">
+                  <button onClick={() => setInterests((s) => s.filter((x) => x.id !== i.id))} aria-label="remove">
                     ×
                   </button>
                 </span>
               ))}
             </div>
             <div className="flex gap-2">
-              <input placeholder="cari minat, cth: hijab fashion" value={query} onChange={(e) => setQuery(e.target.value)} />
+              <input placeholder="search interests, e.g. hijab fashion" value={query} onChange={(e) => setQuery(e.target.value)} />
               <button className="btn btn-ghost" onClick={search} disabled={!query}>
-                Cari
+                Search
               </button>
             </div>
             <div className="flex flex-wrap gap-1 mt-2">
               {results.map((r) => (
                 <button key={r.id} className="badge" onClick={() => setInterests((s) => (s.some((x) => x.id === r.id) ? s : [...s, r]))}>
                   + {r.name}
-                  {r.audienceSize ? ` (${(r.audienceSize / 1e6).toFixed(1)}j)` : ""}
+                  {r.audienceSize ? ` (${(r.audienceSize / 1e6).toFixed(1)}M)` : ""}
                 </button>
               ))}
             </div>
@@ -174,20 +174,20 @@ export function NewCampaignForm({ adAccounts }: { adAccounts: AdAcc[] }) {
           <h2 className="font-semibold">Creative</h2>
           <MediaPicker value={media} onChange={setMedia} accept={account.network === "TIKTOK" ? "video/*" : "image/*,video/*"} />
           <div>
-            <label>Teks utama</label>
+            <label>Primary text</label>
             <textarea rows={3} value={f.primaryText} onChange={(e) => set("primaryText", e.target.value)} />
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
-              <label>Tajuk</label>
+              <label>Headline</label>
               <input value={f.headline} onChange={(e) => set("headline", e.target.value)} />
             </div>
             <div>
-              <label>Link destinasi</label>
+              <label>Destination link</label>
               <input placeholder="https://wa.me/60…" value={f.link} onChange={(e) => set("link", e.target.value)} />
             </div>
             <div>
-              <label>Butang</label>
+              <label>Button</label>
               <select value={f.cta} onChange={(e) => set("cta", e.target.value)}>
                 {CTAS.map((c) => (
                   <option key={c}>{c}</option>
@@ -199,27 +199,27 @@ export function NewCampaignForm({ adAccounts }: { adAccounts: AdAcc[] }) {
 
         {error && <p className="text-sm text-red-500">{error}</p>}
         <button className="btn" disabled={!!busy} onClick={submit}>
-          {busy === "submit" ? "Membina kempen (video boleh ambil beberapa minit)…" : "Bina kempen (PAUSE)"}
+          {busy === "submit" ? "Building campaign (video can take a few minutes)…" : "Create campaign (paused)"}
         </button>
       </div>
 
       <aside className="card space-y-3 h-fit">
-        <h2 className="font-semibold">AI cadang audience</h2>
+        <h2 className="font-semibold">AI audience suggestion</h2>
         <textarea
           rows={5}
-          placeholder="Terangkan produk & pelanggan, cth: kek lapis Sarawak premium, hadiah korporat, pembeli KL/Selangor"
+          placeholder="Describe the product & customers, e.g. premium Sarawak layer cake, corporate gifts, buyers in KL/Selangor"
           value={product}
           onChange={(e) => setProduct(e.target.value)}
         />
         <button className="btn btn-ghost" disabled={busy === "ai" || !product} onClick={suggest}>
-          {busy === "ai" ? "Menganalisis…" : "Cadangkan audience"}
+          {busy === "ai" ? "Analysing…" : "Suggest audience"}
         </button>
         {reasoning && (
           <div className="text-sm space-y-2">
             <p>{reasoning.text}</p>
             {reasoning.ideas.length > 0 && (
               <>
-                <p className="font-semibold text-xs">Idea custom audience / retargeting:</p>
+                <p className="font-semibold text-xs">Custom audience / retargeting ideas:</p>
                 <ul className="list-disc pl-4 text-xs space-y-1">
                   {reasoning.ideas.map((i) => (
                     <li key={i}>{i}</li>

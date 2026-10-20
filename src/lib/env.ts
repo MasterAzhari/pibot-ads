@@ -37,6 +37,6 @@ export function env() {
 
 export function requireEnv<K extends keyof ReturnType<typeof env>>(key: K): NonNullable<ReturnType<typeof env>[K]> {
   const value = env()[key];
-  if (value === undefined || value === "") throw new Error(`${String(key)} belum diset dalam .env`);
+  if (value === undefined || value === "") throw new Error(`${String(key)} is not set in .env`);
   return value as NonNullable<ReturnType<typeof env>[K]>;
 }

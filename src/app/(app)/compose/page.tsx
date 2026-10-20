@@ -10,13 +10,13 @@ export default async function ComposePage() {
   if (!accounts.length) {
     return (
       <div className="card">
-        Sambung akaun dulu di <Link href="/accounts" className="underline">halaman Akaun</Link>.
+        Connect an account first on the <Link href="/accounts" className="underline">Accounts page</Link>.
       </div>
     );
   }
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Buat post</h1>
+      <h1 className="text-2xl font-semibold">Create post</h1>
       <ComposeForm accounts={accounts.map((a) => ({ id: a.id, name: a.name, platform: a.platform, label: PLATFORM_LABEL[a.platform] }))} />
     </div>
   );

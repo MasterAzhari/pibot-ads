@@ -93,7 +93,7 @@ export const metaAds: AdsNetwork = {
   async createCampaign(account, input) {
     const t = token(account);
     const meta = account.meta as { pageId?: string; instagramUserId?: string };
-    if (!meta.pageId) throw new Error("Pilih FB Page untuk ad account ini dulu (halaman Iklan → Tetapan)");
+    if (!meta.pageId) throw new Error("Pick a FB Page for this ad account first (Accounts page)");
     const media = await db.media.findUniqueOrThrow({ where: { id: input.mediaId } });
     const o = OBJECTIVES[input.objective];
 
@@ -137,7 +137,7 @@ export const metaAds: AdsNetwork = {
       await poll(
         async () => {
           const v = await graph.get(video.id, t, { fields: "status" });
-          if (v.status?.video_status === "error") throw new Error("Meta gagal proses video");
+          if (v.status?.video_status === "error") throw new Error("Meta failed to process the video");
           return v.status?.video_status === "ready" ? true : undefined;
         },
         { intervalMs: 10_000, timeoutMs: 20 * 60_000 },
@@ -157,7 +157,7 @@ export const metaAds: AdsNetwork = {
       const { buffer } = await readMedia(media);
       const img = await graph.post(`${act(account)}/adimages`, t, { bytes: buffer.toString("base64") });
       const hash = (Object.values(img.images ?? {})[0] as { hash: string } | undefined)?.hash;
-      if (!hash) throw new Error("Meta tak pulangkan image hash");
+      if (!hash) throw new Error("Meta did not return an image hash");
       object_story_spec = {
         page_id: meta.pageId,
         link_data: { image_hash: hash, link: input.link, message: input.primaryText, name: input.headline, call_to_action: cta },

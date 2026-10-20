@@ -22,10 +22,10 @@ async function guard<T>(fn: () => Promise<T>): Promise<Result<T>> {
   }
 }
 
-/** datetime-local value typed in Malaysia time */
+/** datetime-local value typed in Malaysia time (UTC+8) */
 function parseMyt(value: string) {
   const d = new Date(`${value}:00+08:00`);
-  if (Number.isNaN(d.getTime())) throw new Error("Tarikh/masa tidak sah");
+  if (Number.isNaN(d.getTime())) throw new Error("Invalid date/time");
   return d;
 }
 
@@ -34,7 +34,7 @@ function parseMyt(value: string) {
 export async function uploadMedia(formData: FormData) {
   return guard(async () => {
     const file = formData.get("file");
-    if (!(file instanceof File) || !file.size) throw new Error("Tiada fail");
+    if (!(file instanceof File) || !file.size) throw new Error("No file");
     const media = await saveUpload(file);
     return { id: media.id, mimeType: media.mimeType, filename: media.filename };
   });
@@ -42,10 +42,10 @@ export async function uploadMedia(formData: FormData) {
 
 export async function createPost(input: { caption: string; mediaId?: string; accountIds: string[]; mode: "draft" | "now" | "schedule"; scheduledAt?: string }) {
   return guard(async () => {
-    if (!input.accountIds.length) throw new Error("Pilih sekurang-kurangnya satu akaun");
-    if (!input.caption.trim() && !input.mediaId) throw new Error("Tulis caption atau pilih media");
+    if (!input.accountIds.length) throw new Error("Pick at least one account");
+    if (!input.caption.trim() && !input.mediaId) throw new Error("Write a caption or choose media");
     const scheduledAt = input.mode === "schedule" ? parseMyt(input.scheduledAt ?? "") : null;
-    if (scheduledAt && scheduledAt.getTime() < Date.now() - 60_000) throw new Error("Masa jadual dah lepas");
+    if (scheduledAt && scheduledAt.getTime() < Date.now() - 60_000) throw new Error("Scheduled time is in the past");
 
     const post = await db.post.create({
       data: {
@@ -175,6 +175,7 @@ export async function saveAiSettings(formData: FormData) {
     heavy: formData.get("heavy") as AiProviderId,
     fallback: providers.filter((p) => formData.get(`fallback_${p}`) === "on"),
     monthlyBudgetUsd: Number(formData.get("monthlyBudgetUsd") ?? 10),
+    contentLanguage: String(formData.get("contentLanguage") ?? "").trim() || DEFAULT_AI_SETTINGS.contentLanguage,
     models,
     prices,
   });
@@ -193,7 +194,7 @@ export async function syncAdsAction() {
 export async function runAnalysisAction() {
   const r = await guard(async () => {
     const res = await runDailyAnalysis();
-    if (!res) throw new Error("Belum ada kempen untuk dianalisis");
+    if (!res) throw new Error("No campaigns to analyse yet");
     return res.summary;
   });
   revalidatePath("/ads");
@@ -211,7 +212,7 @@ export async function toggleCampaign(campaignId: string, active: boolean) {
 
 export async function setBudgetAction(campaignId: string, amount: number) {
   const r = await guard(async () => {
-    if (!(amount > 0)) throw new Error("Bajet tidak sah");
+    if (!(amount > 0)) throw new Error("Invalid budget");
     const c = await db.campaign.findUniqueOrThrow({ where: { id: campaignId }, include: { adAccount: true } });
     await adsNetworks[c.adAccount.network].setDailyBudget(c.adAccount, c, amount);
   });
@@ -231,9 +232,9 @@ export async function decideRecommendation(id: string, approve: boolean) {
 export async function createCampaignAction(adAccountId: string, input: NewCampaignInput) {
   return guard(async () => {
     const account = await db.adAccount.findUniqueOrThrow({ where: { id: adAccountId } });
-    if (!input.name.trim()) throw new Error("Nama kempen diperlukan");
-    if (!(input.dailyBudget > 0)) throw new Error("Bajet harian diperlukan");
-    if (!input.link.startsWith("http")) throw new Error("Link destinasi mesti bermula dengan http");
+    if (!input.name.trim()) throw new Error("Campaign name is required");
+    if (!(input.dailyBudget > 0)) throw new Error("Daily budget is required");
+    if (!input.link.startsWith("http")) throw new Error("Destination link must start with http");
     return adsNetworks[account.network].createCampaign(account, input);
   });
 }

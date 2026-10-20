@@ -24,12 +24,12 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Akaun</h1>
-      {connected && <div className="card text-sm">✓ Disambung: {connected}</div>}
-      {error && <div className="card text-sm text-red-500">Gagal sambung: {error}</div>}
+      <h1 className="text-2xl font-semibold">Accounts</h1>
+      {connected && <div className="card text-sm">✓ Connected: {connected}</div>}
+      {error && <div className="card text-sm text-red-500">Connection failed: {error}</div>}
 
       <section className="card space-y-3">
-        <h2 className="font-semibold">Sambung akaun</h2>
+        <h2 className="font-semibold">Connect accounts</h2>
         <div className="flex flex-wrap gap-2">
           {connectors.map((c) =>
             c.ready ? (
@@ -37,25 +37,25 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
                 {c.label}
               </a>
             ) : (
-              <span key={c.href} className="btn btn-ghost opacity-60" title="Isi App ID & secret dalam .env dulu">
-                {c.label} (belum setup)
+              <span key={c.href} className="btn btn-ghost opacity-60" title="Fill in the App ID & secret in .env first">
+                {c.label} (not set up)
               </span>
             ),
           )}
         </div>
         <p className="text-xs muted">
-          Redirect URI untuk didaftar di portal developer: <code>{e.APP_URL}/api/oauth/&lt;meta|threads|tiktok|tiktok-ads&gt;/callback</code>
+          Redirect URI to register in the developer portal: <code>{e.APP_URL}/api/oauth/&lt;meta|threads|tiktok|tiktok-ads&gt;/callback</code>
         </p>
       </section>
 
       <section className="card">
-        <h2 className="font-semibold mb-2">Akaun sosial</h2>
+        <h2 className="font-semibold mb-2">Social accounts</h2>
         <table>
           <thead>
             <tr>
               <th>Platform</th>
-              <th>Nama</th>
-              <th>Token tamat</th>
+              <th>Name</th>
+              <th>Token expires</th>
               <th />
             </tr>
           </thead>
@@ -64,12 +64,12 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
               <tr key={a.id}>
                 <td>{PLATFORM_LABEL[a.platform]}</td>
                 <td>{a.name}</td>
-                <td className="muted">{a.tokenExpiresAt ? fmtDateTime(a.tokenExpiresAt) : "tiada had"}</td>
+                <td className="muted">{a.tokenExpiresAt ? fmtDateTime(a.tokenExpiresAt) : "never"}</td>
                 <td className="text-right">
                   <form action={disconnectAccount}>
                     <input type="hidden" name="id" value={a.id} />
                     <input type="hidden" name="kind" value="social" />
-                    <button className="text-xs underline muted">Putus</button>
+                    <button className="text-xs underline muted">Disconnect</button>
                   </form>
                 </td>
               </tr>
@@ -77,7 +77,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
             {!accounts.length && (
               <tr>
                 <td colSpan={4} className="muted">
-                  Belum ada.
+                  None yet.
                 </td>
               </tr>
             )}
@@ -90,10 +90,10 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
         <table>
           <thead>
             <tr>
-              <th>Rangkaian</th>
-              <th>Nama</th>
-              <th>Mata wang</th>
-              <th>FB Page untuk iklan</th>
+              <th>Network</th>
+              <th>Name</th>
+              <th>Currency</th>
+              <th>FB Page for ads</th>
               <th />
             </tr>
           </thead>
@@ -116,7 +116,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
                             </option>
                           ))}
                         </select>
-                        <button className="btn btn-ghost">Simpan</button>
+                        <button className="btn btn-ghost">Save</button>
                       </form>
                     ) : (
                       <span className="muted">–</span>
@@ -126,7 +126,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
                     <form action={disconnectAccount}>
                       <input type="hidden" name="id" value={a.id} />
                       <input type="hidden" name="kind" value="ad" />
-                      <button className="text-xs underline muted">Putus</button>
+                      <button className="text-xs underline muted">Disconnect</button>
                     </form>
                   </td>
                 </tr>
@@ -135,7 +135,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
             {!adAccounts.length && (
               <tr>
                 <td colSpan={5} className="muted">
-                  Belum ada.
+                  None yet.
                 </td>
               </tr>
             )}

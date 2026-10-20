@@ -24,37 +24,37 @@ export function Studio() {
     <div className="grid gap-4 lg:grid-cols-3">
       <div className="card space-y-3 h-fit">
         <div>
-          <label>Produk / idea video</label>
-          <textarea rows={6} value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="cth: serum muka untuk kulit berminyak, target wanita 20-35, harga RM49" />
+          <label>Product / video idea</label>
+          <textarea rows={6} value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="e.g. face serum for oily skin, women 20-35, RM49" />
         </div>
         <div>
-          <label>Panjang video</label>
+          <label>Video length</label>
           <select value={seconds} onChange={(e) => setSeconds(Number(e.target.value))}>
             {[15, 30, 45, 60].map((s) => (
               <option key={s} value={s}>
-                {s} saat
+                {s} seconds
               </option>
             ))}
           </select>
         </div>
         <button className="btn" disabled={busy || !brief} onClick={go}>
-          {busy ? "Menulis skrip…" : "Jana rancangan video"}
+          {busy ? "Writing script…" : "Generate video plan"}
         </button>
         {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
       {plan && (
         <div className="card space-y-4 lg:col-span-2">
           <div>
-            <div className="text-xs muted">Hook (3 saat pertama)</div>
+            <div className="text-xs muted">Hook (first 3 seconds)</div>
             <p className="text-lg font-semibold">{plan.hook}</p>
           </div>
           <table>
             <thead>
               <tr>
-                <th>Saat</th>
+                <th>Seconds</th>
                 <th>Visual</th>
-                <th>Suara</th>
-                <th>Teks atas skrin</th>
+                <th>Voiceover</th>
+                <th>On-screen text</th>
               </tr>
             </thead>
             <tbody>

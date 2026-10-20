@@ -5,7 +5,7 @@ export type PublishResult = { externalId: string; permalink?: string };
 
 export interface Publisher {
   publish(account: Account, input: PublishInput): Promise<PublishResult>;
-  /** undefined = platform API tak benarkan edit lepas post */
+  /** undefined = the platform API does not allow edits after posting */
   edit?(account: Account, externalId: string, caption: string): Promise<void>;
   remove?(account: Account, externalId: string): Promise<void>;
 }
