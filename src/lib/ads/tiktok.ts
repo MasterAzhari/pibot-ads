@@ -171,6 +171,9 @@ export const tiktokAds: AdsNetwork = {
     if (!isVideo(media)) throw new Error("Iklan TikTok perlukan video");
     const o = OBJECTIVES[input.objective];
     const advertiser_id = adv(account);
+    // Validate everything local before the first remote call so a bad input never leaves an orphan campaign.
+    const location_ids = input.countries.map((c) => COUNTRY_LOCATION[c]).filter(Boolean);
+    if (!location_ids.length) throw new Error(`Negara belum dipetakan untuk TikTok: ${input.countries.join(", ")}`);
 
     const campaign = await call(account, "POST", "campaign/create/", {
       advertiser_id,
@@ -180,8 +183,6 @@ export const tiktokAds: AdsNetwork = {
       operation_status: "DISABLE",
     });
 
-    const location_ids = input.countries.map((c) => COUNTRY_LOCATION[c]).filter(Boolean);
-    if (!location_ids.length) throw new Error(`Negara belum dipetakan untuk TikTok: ${input.countries.join(", ")}`);
     const age_groups = AGE_GROUPS.filter(([, lo, hi]) => hi >= input.ageMin && lo <= input.ageMax).map(([g]) => g);
     const now = new Date(Date.now() + 10 * 60_000).toISOString().replace("T", " ").slice(0, 19);
 

@@ -10,8 +10,12 @@ export async function publishPost(postId: string) {
   await db.post.update({ where: { id: postId }, data: { status: "PUBLISHING" } });
 
   for (const target of post.targets) {
-    if (target.status === "PUBLISHED") continue;
-    await db.postTarget.update({ where: { id: target.id }, data: { status: "PUBLISHING", error: null } });
+    // Claim each target atomically so a manual "post now" racing the worker can't publish twice.
+    const claimed = await db.postTarget.updateMany({
+      where: { id: target.id, status: { in: ["PENDING", "FAILED"] } },
+      data: { status: "PUBLISHING", error: null },
+    });
+    if (!claimed.count) continue;
     try {
       const result = await publishers[target.account.platform].publish(target.account, { caption: post.caption, media: post.media });
       await db.postTarget.update({

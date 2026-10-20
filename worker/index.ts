@@ -26,12 +26,16 @@ async function dailyIfDue() {
   const now = new Date();
   const myt = new Date(now.getTime() + 8 * 3600_000);
   const today = myt.toISOString().slice(0, 10);
-  const last = await getSetting<{ day?: string }>("worker:daily", {});
-  if (last.day === today || myt.getUTCHours() < DAILY_HOUR_MYT) return;
-  await setSetting("worker:daily", { day: today });
+  const last = await getSetting<{ day?: string; done?: boolean; attempts?: number }>("worker:daily", {});
+  if (myt.getUTCHours() < DAILY_HOUR_MYT) return;
+  const attempts = last.day === today ? (last.attempts ?? 0) : 0;
+  // Retry a failed run on the next tick, but give up after 3 tries so a broken key doesn't loop all day.
+  if ((last.day === today && last.done) || attempts >= 3) return;
+  await setSetting("worker:daily", { day: today, done: false, attempts: attempts + 1 });
   console.log("[daily] running AI analysis");
   await refreshTokens();
   await runDailyAnalysis();
+  await setSetting("worker:daily", { day: today, done: true, attempts: attempts + 1 });
 }
 
 async function main() {

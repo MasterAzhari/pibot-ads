@@ -13,12 +13,24 @@ export default async function Dashboard() {
     db.adAccount.count(),
     db.post.findMany({ where: { status: "SCHEDULED" }, orderBy: { scheduledAt: "asc" }, take: 5 }),
     db.post.count({ where: { status: { in: ["FAILED", "PARTIAL"] } } }),
-    db.insightDaily.aggregate({ _sum: { spend: true, clicks: true, impressions: true }, where: { date: { gte: weekAgo } } }),
+    db.insightDaily.findMany({
+      where: { date: { gte: weekAgo } },
+      select: { spend: true, clicks: true, campaign: { select: { adAccount: { select: { currency: true } } } } },
+    }),
     db.recommendation.count({ where: { status: "PENDING" } }),
     monthSpendUsd(),
     getAiSettings(),
     getSetting<{ summary?: string; at?: string }>("lastAnalysis", {}),
   ]);
+
+  // Ad accounts can be in different currencies, so totals are kept per currency.
+  const spendByCurrency = new Map<string, number>();
+  for (const i of spend) {
+    const cur = i.campaign.adAccount.currency;
+    spendByCurrency.set(cur, (spendByCurrency.get(cur) ?? 0) + i.spend);
+  }
+  const spendText = spendByCurrency.size ? [...spendByCurrency].map(([cur, n]) => fmtMoney(n, cur)).join(" · ") : fmtMoney(0);
+  const clicks = spend.reduce((s, i) => s + i.clicks, 0);
 
   return (
     <div className="space-y-6">
@@ -30,7 +42,7 @@ export default async function Dashboard() {
       )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Akaun sosial" value={String(accounts)} sub={`${adAccounts} ad account`} />
-        <Stat label="Spend iklan 7 hari" value={fmtMoney(spend._sum.spend ?? 0)} sub={`${spend._sum.clicks ?? 0} klik`} />
+        <Stat label="Spend iklan 7 hari" value={spendText} sub={`${clicks} klik`} />
         <Stat label="Cadangan AI menunggu" value={String(pending)} sub={<Link href="/ads" className="underline">Semak</Link>} />
         <Stat label="Kos AI bulan ini" value={`USD ${aiSpent.toFixed(2)}`} sub={`had USD ${ai.monthlyBudgetUsd}`} />
       </div>

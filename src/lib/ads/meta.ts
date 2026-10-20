@@ -110,10 +110,10 @@ export const metaAds: AdsNetwork = {
     const targeting: Record<string, unknown> = {
       geo_locations: { countries: input.countries },
       age_min: input.ageMin,
+      // With Advantage+ audience Meta treats age as a suggestion and requires age_max 65.
+      age_max: input.advantageAudience ? 65 : input.ageMax,
       targeting_automation: { advantage_audience: input.advantageAudience ? 1 : 0 },
     };
-    // With Advantage+ audience Meta treats age as a suggestion and requires age_max 65.
-    if (!input.advantageAudience) targeting.age_max = input.ageMax;
     if (input.gender !== "ALL") targeting.genders = [input.gender === "MALE" ? 1 : 2];
     if (input.interests.length) targeting.flexible_spec = [{ interests: input.interests.map(({ id, name }) => ({ id, name })) }];
     // No publisher_platforms = Advantage+ placements: FB, IG, Threads, Messenger, Audience Network.
